@@ -8,7 +8,7 @@ BEGIN
     # Step 1: Prepare
     DELETE FROM tmp_upe_staging;
     DELETE FROM tmp_upe_main;
-    INSERT INTO upe_staging_hist SELECT * FROM upe_staging;
+    INSERT INTO upe_staging_hist (bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated)SELECT bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated FROM upe_staging;
     INSERT INTO tmp_upe_staging SELECT * FROM upe_staging;
     
     # Step 2: Fix values
