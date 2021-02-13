@@ -2,6 +2,9 @@ CREATE DEFINER=`admin_user`@`%` PROCEDURE `proc_upe`()
 BEGIN
 	# Process data from upe_staging to upe_main. Must be performed before proc_epe
     
+	## For the sake of testing
+    DECLARE affectedRow INT;
+    
     # Step 1: Prepare
     DELETE FROM tmp_upe_staging;
     DELETE FROM tmp_upe_main;
@@ -16,14 +19,54 @@ BEGIN
     
     # Step 3: Clean up
     
-    # Error Type 1 (FARHA please compare with test_upe)
+    # Error Type 1
     DELETE FROM tmp_upe_staging WHERE red_group_id = '';
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Empty red_group_id', affectedRow);
+	end if;
     
-    # Error Type 2 (FARHA)
+    # Error Type 2
     DELETE FROM tmp_upe_staging WHERE LENGTH(epe_port) > 2;
+	SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Length epe_port >2', affectedRow);
+	end if;
     
-    # Error Type 3 (FARHA)
+    # Error Type 3
     DELETE FROM tmp_upe_staging WHERE role IN ('1', '2');
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is not in format PRIMARY/SECONDARY/ACTIVE/PASSIVE', affectedRow);
+	end if;
+    
+	# Error Type 4
+    DELETE FROM tmp_upe_staging WHERE epe_card IS NULL;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing epe_card information', affectedRow);
+	end if;
+    
+	# Error Type 5
+    DELETE FROM tmp_upe_staging WHERE role IS NULL;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing role information', affectedRow);
+	end if;
+    
+	# Error Type 6
+    DELETE FROM tmp_upe_staging WHERE service_sla_slg IS NULL;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing service_sla_slg information', affectedRow);
+	end if;
+    
+	# Error Type 7
+    DELETE FROM tmp_upe_staging WHERE physical_group_slg IS NULL;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing service_sla_slg information', affectedRow);
+	end if;
     
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
     
