@@ -16,49 +16,14 @@ BEGIN
     
     # Step 3: Clean up
     
-    # Error Type 1
+    # Error Type 1 (FARHA please compare with test_upe)
     DELETE FROM tmp_upe_staging WHERE red_group_id = '';
-    SET affectedRow = (SELECT ROW_COUNT());
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Empty red_group_id', affectedRow);
-	end if;
     
-    # Error Type 2
+    # Error Type 2 (FARHA)
     DELETE FROM tmp_upe_staging WHERE LENGTH(epe_port) > 2;
-	SET affectedRow = (SELECT ROW_COUNT());
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Length epe_port >2', affectedRow);
-	end if;
     
-    # Error Type 3
+    # Error Type 3 (FARHA)
     DELETE FROM tmp_upe_staging WHERE role IN ('1', '2');
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is not in format PRIMARY/SECONDARY/ACTIVE/PASSIVE', affectedRow);
-	end if;
-    
-	# Error Type 4
-    DELETE FROM tmp_upe_staging WHERE epe_card = NULL OR epe_card = '';
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing epe_card information', affectedRow);
-	end if;
-    
-	# Error Type 5
-    DELETE FROM tmp_upe_staging WHERE role = NULL OR role = '';
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing role information', affectedRow);
-	end if;
-    
-	# Error Type 6
-    DELETE FROM tmp_upe_staging WHERE service_sla_slg = NULL OR service_sla_slg = '';
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing service_sla_slg information', affectedRow);
-	end if;
-    
-	# Error Type 7
-    DELETE FROM tmp_upe_staging WHERE physical_group_slg = NULL OR physical_group_slg = '';
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing service_sla_slg information', affectedRow);
-	end if;
     
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
     
@@ -67,6 +32,6 @@ BEGIN
     
     # Step 5: Populate the upe_main
     DELETE FROM upe_main;
-    
     INSERT INTO upe_main SELECT * FROM tmp_upe_main;
+    
 END
