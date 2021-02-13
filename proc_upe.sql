@@ -8,6 +8,7 @@ BEGIN
     # Step 1: Prepare
     DELETE FROM tmp_upe_staging;
     DELETE FROM tmp_upe_main;
+    INSERT INTO upe_staging_hist SELECT * FROM upe_staging;
     INSERT INTO tmp_upe_staging SELECT * FROM upe_staging;
     
     # Step 2: Fix values
