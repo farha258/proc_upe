@@ -66,13 +66,13 @@ BEGIN
     DELETE FROM tmp_upe_staging WHERE physical_group_slg IS NULL;
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing service_sla_slg information', affectedRow);
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing physical_group_slg information', affectedRow);
 	end if;
     
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
     
     # Step 4: Populate tmp_upe_main
-    INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no FROM tmp_upe_staging;
+    INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, red_id) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, concat(red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging;
     
     # Step 5: Populate the upe_main
     DELETE FROM upe_main;
