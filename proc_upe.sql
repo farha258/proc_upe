@@ -20,7 +20,7 @@ BEGIN
     
     # Step 3: Clean up
     
-    # Error Type 1
+    # Error Type 1 (DELETE)
     DELETE FROM tmp_upe_staging WHERE red_group_id = '';
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
@@ -35,7 +35,7 @@ BEGIN
 	end if;
     
     # Error Type 3
-    DELETE FROM tmp_upe_staging WHERE role IN ('1', '2');
+    DELETE FROM tmp_upe_staging WHERE role NOT IN ('PRIMARY', 'SECONDARY', 'ACTIVE', 'PASSIVE');
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is not in format PRIMARY/SECONDARY/ACTIVE/PASSIVE', affectedRow);
@@ -69,13 +69,20 @@ BEGIN
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Missing physical_group_slg information', affectedRow);
 	end if;
     
+	# Error Type 8
+    DELETE FROM tmp_upe_staging WHERE length(primary_no) > 20;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'primary_no length > 20 digit', affectedRow);
+	end if;
+    
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
     
     # Step 4: Populate tmp_upe_main
-    INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, red_id) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, concat(red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging;
+    INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, red_id) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, concat(red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging group by red_id;
     
     # Step 5: Populate the upe_main
     DELETE FROM upe_main;
     INSERT INTO upe_main SELECT * FROM tmp_upe_main;
-    
+
 END
