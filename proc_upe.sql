@@ -41,6 +41,13 @@ BEGIN
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is not in format PRIMARY/SECONDARY/ACTIVE/PASSIVE', affectedRow);
 	end if;
     
+    # Error Type 3b
+    DELETE FROM tmp_upe_staging WHERE role IS NULL;
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is NULL', affectedRow);
+	end if;
+    
 	# Error Type 4
     SET occurrences = (SELECT COUNT(*) FROM tmp_upe_staging WHERE epe_card IS NULL);
     if occurrences > 0 then
@@ -76,8 +83,55 @@ BEGIN
     
     # Step 4: Populate tmp_upe_main
     INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, red_id) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, concat_ws('',red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging group by red_id;
+
     # Step 5: Populate the upe_main
-    DELETE FROM upe_main;
-    INSERT INTO upe_main SELECT * FROM tmp_upe_main;
+        INSERT INTO upe_main (
+          bandwidth, 
+          red_group_id,
+          upe_name,
+          upe_vendor,
+          upe_model,
+          upe_port_status,
+          epe_name,
+          epe_card,
+          epe_slot,
+          epe_port,
+          role,
+          service_sla_slg,
+          physical_group_slg,
+          primary_no,
+          red_id) 
+      SELECT 
+          bandwidth, 
+          red_group_id,
+          upe_name,
+          upe_vendor,
+          upe_model,
+          upe_port_status,
+          epe_name,
+          epe_card,
+          epe_slot,
+          epe_port,
+          role,
+          service_sla_slg,
+          physical_group_slg,
+          primary_no, 
+          red_id 
+      FROM tmp_upe_main AS a
+      ON DUPLICATE KEY UPDATE 
+		bandwidth = a.bandwidth, 
+        red_group_id = a.red_group_id,
+		upe_name = a.upe_name,
+		upe_vendor = a.upe_vendor,
+		upe_model = a.upe_model,
+		upe_port_status = a.upe_port_status,
+		epe_name = a.epe_name,
+		epe_card = a.epe_card,
+		epe_slot = a.epe_slot,
+		epe_port = a.epe_port,
+		role = a.role,
+		service_sla_slg = a.service_sla_slg,
+		physical_group_slg = a.physical_group_slg,
+		primary_no = a.primary_no;
 
 END
