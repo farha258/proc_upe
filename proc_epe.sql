@@ -5,8 +5,9 @@ BEGIN
     DECLARE occurrences INT;
     
     # Step 1: Prepare
-    DELETE FROM tmp_epe_staging;
-    DELETE FROM tmp_epe_main;
+    TRUNCATE TABLE tmp_epe_name;
+    TRUNCATE TABLE tmp_epe_staging;
+    TRUNCATE TABLE tmp_epe_main;
     INSERT INTO tmp_epe_staging SELECT * FROM epe_staging;
     
     # Step 2: Normalize
@@ -17,10 +18,18 @@ BEGIN
     
     # Step 3: Clean up
     DELETE FROM tmp_epe_staging WHERE epe_name LIKE '%-SH%';
-    DELETE FROM tmp_epe_staging WHERE customer_id like '%DUMMY%';
     DELETE FROM tmp_epe_staging WHERE status NOT IN ('In Service', 'Pending Installation');
     DELETE FROM tmp_epe_staging WHERE vendor NOT IN ('HUAWEI', 'NOKIA');
-    DELETE FROM tmp_epe_staging WHERE epe_name IN (SELECT epe_name FROM epe_staging GROUP BY epe_name HAVING COUNT(*) > 1) AND status = 'Pending Installation';
+    DELETE FROM tmp_epe_staging WHERE customer_id LIKE '%DUMMY%';
+    
+	# Remarks: Due to time taken to handle this query, need to adjust accordingly
+    # DELETE FROM tmp_epe_staging WHERE epe_name IN (SELECT epe_name FROM epe_staging GROUP BY epe_name HAVING COUNT(*) > 1) AND status = 'Pending Installation';
+    INSERT INTO tmp_epe_name (epe_name) SELECT epe_name FROM (SELECT epe_name FROM tmp_epe_staging GROUP BY epe_name HAVING COUNT(*) > 1) A;
+    #DELETE FROM tmp_epe_staging WHERE epe_name IN (SELECT epe_name FROM tmp_epe_name) AND status = 'Pending Installation';
+    
+    # For the time being, temporarily we shall delete all the duplicates
+    # until Yante can get confirmation from Data Source
+    DELETE FROM tmp_epe_staging WHERE epe_name IN (SELECT epe_name FROM tmp_epe_name);
     
     # Extra - update the metroe_error table to reflect the error with records
     
@@ -47,7 +56,11 @@ BEGIN
     INSERT INTO tmp_epe_main(customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip) SELECT customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip FROM tmp_epe_staging;
 
 	# Step 5: Now, ready to populate epe_main
-    DELETE FROM epe_main;
+    TRUNCATE TABLE epe_main;
     INSERT INTO epe_main SELECT * FROM tmp_epe_main;
+    
+    # Step 6: Archive to epe_staging_hist, and perform clean up
+    INSERT INTO epe_staging_hist (customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated) SELECT customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated FROM epe_staging;
+	  TRUNCATE TABLE epe_staging;
     
 END
