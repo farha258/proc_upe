@@ -17,6 +17,7 @@ BEGIN
     
     # Step 3: Clean up
     DELETE FROM tmp_epe_staging WHERE epe_name LIKE '%-SH%';
+    DELETE FROM tmp_epe_staging WHERE customer_id like '%DUMMY%';
     DELETE FROM tmp_epe_staging WHERE status NOT IN ('In Service', 'Pending Installation');
     DELETE FROM tmp_epe_staging WHERE vendor NOT IN ('HUAWEI', 'NOKIA');
     DELETE FROM tmp_epe_staging WHERE epe_name IN (SELECT epe_name FROM epe_staging GROUP BY epe_name HAVING COUNT(*) > 1) AND status = 'Pending Installation';

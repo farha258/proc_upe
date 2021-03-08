@@ -7,9 +7,8 @@ BEGIN
     DECLARE occurrences INT;
     
     # Step 1: Prepare
-    DELETE FROM tmp_upe_staging;
-    DELETE FROM tmp_upe_main;
-    INSERT INTO upe_staging_hist (bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated)SELECT bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated FROM upe_staging;
+    TRUNCATE TABLE tmp_upe_staging;
+    TRUNCATE TABLE tmp_upe_main;
     INSERT INTO tmp_upe_staging SELECT * FROM upe_staging;
     
     # Step 2: Fix values
@@ -29,10 +28,13 @@ BEGIN
 	end if;
     
     # Error Type 2
-    SET occurrences = (SELECT COUNT(*) FROM tmp_upe_staging WHERE LENGTH(epe_port) > 2);
+    SET occurrences = (SELECT COUNT(*) FROM tmp_upe_staging WHERE epe_port NOT REGEXP '^-?[0-9]+$');
     if occurrences > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Length epe_port >2', occurrences);
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'epe_port is not an integer', occurrences);
     end if;
+    
+    # Remarks: We update it here so that we can identify first how many is having issue
+	UPDATE tmp_upe_staging SET epe_port = NULL WHERE epe_port NOT REGEXP '^-?[0-9]+$';
 
     # Error Type 3
     DELETE FROM tmp_upe_staging WHERE role NOT IN ('PRIMARY', 'SECONDARY', 'ACTIVE', 'PASSIVE');
@@ -79,13 +81,13 @@ BEGIN
     end if;
     
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
-    DELETE FROM tmp_epe_staging WHERE vendor NOT IN ('HUAWEI', 'NOKIA');
+    DELETE FROM tmp_upe_staging WHERE upe_vendor NOT IN ('HUAWEI', 'NOKIA');
     
     # Step 4: Populate tmp_upe_main
     INSERT INTO tmp_upe_main (bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, red_id) SELECT bandwidth,red_group_id,upe_name,upe_vendor,upe_model,upe_port_status,epe_name,epe_card,epe_slot,epe_port,role,service_sla_slg,physical_group_slg,primary_no, concat_ws('',red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging group by red_id;
 
     # Step 5: Populate the upe_main
-        INSERT INTO upe_main (
+	INSERT INTO upe_main (
           bandwidth, 
           red_group_id,
           upe_name,
@@ -133,5 +135,9 @@ BEGIN
 		service_sla_slg = a.service_sla_slg,
 		physical_group_slg = a.physical_group_slg,
 		primary_no = a.primary_no;
+
+	# Step 6: Archive the upe_staging data and clean it up
+	INSERT INTO upe_staging_hist (bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated)SELECT bandwidth, red_group_id, upe_name, upe_vendor, upe_model, upe_ip, upe_card, upe_slot, upe_port, upe_port_status, epe_name, epe_card, epe_slot, epe_port, role, product, service_sla_slg, physical_group_slg, primary_no, updated FROM upe_staging;
+    TRUNCATE TABLE upe_staging;
 
 END
