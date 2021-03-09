@@ -1,6 +1,7 @@
 CREATE DEFINER=`admin_user`@`%` PROCEDURE `proc_flash`()
 BEGIN
 	# Purpose: Process the flash_staging to flash_main
+    DECLARE occurrences INT;
     
     # Step 1: Prepare for processing
     DELETE FROM tmp_flash_staging;
@@ -8,6 +9,27 @@ BEGIN
     INSERT INTO tmp_flash_staging SELECT * FROM flash_staging;
     
     # Step 2: Clean up
+	# Error Type 1
+    SET occurrences = (SELECT COUNT(*) FROM tmp_flash_staging WHERE ne_shelf NOT REGEXP '^-?[0-9]+$');
+    if occurrences > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('flash_staging', 'ne_shelf is not an integer', occurrences);
+    end if;
+    
+	SET occurrences = (SELECT COUNT(*) FROM tmp_flash_staging WHERE ne_slot NOT REGEXP '^-?[0-9]+$');
+    if occurrences > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('flash_staging', 'ne_slot is not an integer', occurrences);
+    end if;
+    
+	SET occurrences = (SELECT COUNT(*) FROM tmp_flash_staging WHERE ne_port NOT REGEXP '^-?[0-9]+$');
+    if occurrences > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('flash_staging', 'ne_port is not an integer', occurrences);
+    end if;
+    
+    # Remarks: We update it here so that we can identify first how many is having issue
+    UPDATE tmp_flash_staging SET ne_shelf = NULL WHERE ne_shelf NOT REGEXP '^-?[0-9]+$';
+    UPDATE tmp_flash_staging SET ne_slot = NULL WHERE ne_slot NOT REGEXP '^-?[0-9]+$';
+	UPDATE tmp_flash_staging SET ne_shelf = NULL WHERE ne_port NOT REGEXP '^-?[0-9]+$';
+    
 	DELETE FROM tmp_flash_staging WHERE ne_shelf IN ('', '?');
     DELETE FROM tmp_flash_staging WHERE ne_slot IN ('', '?');
     DELETE FROM tmp_flash_staging WHERE ne_port IN ('', '?');
