@@ -168,8 +168,8 @@ BEGIN
             c.region_code
 		FROM tmp_upe_main AS a
 		JOIN epe_main AS b ON b.epe_name = a.epe_name
-		LEFT JOIN (select cable_name, group_concat(core_no) as core_no ,ne_id, ne_shelf ,ne_slot ,ne_port
-		from flash_main group by cable_name, ne_id, ne_shelf ,ne_slot ,ne_port) AS d 
+		LEFT JOIN (select group_concat(distinct cable_name) as cable_name, group_concat(distinct core_no) as core_no ,ne_id, ne_shelf ,ne_slot ,ne_port
+		from flash_main group by ne_id, ne_shelf ,ne_slot ,ne_port) AS d 
         ON a.epe_name = d.ne_id AND a.epe_card = d.ne_shelf AND a.epe_slot = d.ne_slot AND a.epe_port = d.ne_port
         LEFT JOIN inv_detail AS c ON c.exc = b.exc;
         -- LEFT JOIN flash_main AS d ON a.epe_name = d.ne_id AND a.epe_card = d.ne_shelf AND a.epe_slot = d.ne_slot AND a.epe_port = d.ne_port
