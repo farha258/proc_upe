@@ -54,7 +54,6 @@ BEGIN
 	INSERT INTO tmp_flash_main (cable_name,type,core_no,core_status,frame_name,frame_location,shelf_block,row_no,vertical,ne_id,ne_shelf,ne_slot,ne_port,frame_name2,frame_location2,shelf_block2,row_no2,vertical2,access_port,ne_id2,updated,flash_id) SELECT cable_name,type,core_no,core_status,frame_name,frame_location,shelf_block,row_no,vertical,ne_id,ne_shelf,ne_slot,ne_port,frame_name2,frame_location2,shelf_block2,row_no2,vertical2,access_port,ne_id2,updated, concat_ws('',ne_id,'_',ne_shelf,'/',ne_slot,'/',ne_port,'_',core_no) as flash_id FROM tmp_flash_staging WHERE ne_id IN (SELECT epe_name FROM epe_main) group by flash_id;
     
     # Step 4: Will all ok so far, time to transfer to the main table on duplicates update
-    DELETE FROM flash_main;
     INSERT INTO flash_main (cable_name,
                                 type,
                                 core_no,
