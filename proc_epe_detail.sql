@@ -197,6 +197,10 @@ BEGIN
     # Case for role is NULL (REMM-IVDB-01482)
     UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01482' WHERE role IS NULL;
     
+    # Update case null = 0
+    UPDATE tmp_epe_detail set faulty = '0' where err_code is null;
+    UPDATE tmp_epe_detail set err_code = '' where err_code is null;
+    
     
     ## Step 4 - For the time being, copy everything to the epe_detail table
     # perhaps in the future we shall revisit to have it updated on deplicate
