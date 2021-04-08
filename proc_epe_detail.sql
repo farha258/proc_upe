@@ -39,7 +39,8 @@ BEGIN
 								wilayah_code,
 								region_code,
 								faulty,
-								err_code,
+								remark_code,
+                                remark,
 								updated) SELECT red_group_id,
 								upe_name,
 								upe_vendor,
@@ -78,7 +79,8 @@ BEGIN
 								wilayah_code,
 								region_code,
 								faulty,
-								err_code,
+								remark_code,
+                                remark,
 								updated from epe_detail;
 
 	## Step 1 - Prepare tmp tables
@@ -138,7 +140,6 @@ BEGIN
             a.epe_slot,
             a.epe_port,
             a.role,
-            -- service_sla_slg, physical_group_slg, primary_no, epe_serial, epe_ip, epe_status, 
             a.service_sla_slg,
             a.physical_group_slg,
             a.primary_no,
@@ -158,10 +159,8 @@ BEGIN
             b.serial,
             b.ip,
             b.status,
-            -- cable_name, core_no
             d.cable_name,
             d.core_no,
-            -- exc_abb, zone_code, wilayah_code, region_code
             b.exc,
             c.zone_code,
             c.wilayah_code,
@@ -177,29 +176,29 @@ BEGIN
         
 	## Step 3 - Set the faulty flag and remarks code
     # Case for unknown EPE
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01474' WHERE epe_name NOT IN (SELECT epe_name FROM epe_main);
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01474' AND remark = 'Unknown EPE' WHERE epe_name NOT IN (SELECT epe_name FROM epe_main);
     
     # Case for unknown exchange abbreviation
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01475' WHERE zone_code IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01475' AND remark = 'Unknown Exchange Abbreviation' WHERE zone_code IS NULL;
     
     # Case for epe_ip NULL (REMM-IVDB-01478)
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01478' WHERE epe_ip IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01478' AND remark = 'Invalid EPE IP address' WHERE epe_ip IS NULL;
     
     # Case for epe_card IS NULL (REMM-IVDB-01479)
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01479' WHERE epe_card IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01479' AND remark = 'Invalid EPE card value' WHERE epe_card IS NULL;
     
     # Case for epe_slot IS NULL (REMM-IVDB-01480)
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01480' WHERE epe_slot IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01480' AND remark = 'Invalid EPE slot value' WHERE epe_slot IS NULL;
     
     # Case for epe_port IS NULL (REMM-IVDB-01481)
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01481' WHERE epe_port IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01481' AND remark = 'Invalid EPE port value' WHERE epe_port IS NULL;
     
     # Case for role is NULL (REMM-IVDB-01482)
-    UPDATE tmp_epe_detail SET faulty = '1', err_code = 'REMM-IVDB-01482' WHERE role IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01482' AND remark = 'Invalid EPE role value' WHERE role IS NULL;
     
     # Update case null = 0
-    UPDATE tmp_epe_detail set faulty = '0' where err_code is null;
-    UPDATE tmp_epe_detail set err_code = '' where err_code is null;
+    UPDATE tmp_epe_detail set faulty = '0' where remark_code is null;
+    UPDATE tmp_epe_detail set remark_code = '' where remark_code is null;
     
     
     ## Step 4 - For the time being, copy everything to the epe_detail table
