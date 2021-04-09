@@ -196,6 +196,9 @@ BEGIN
     # Case for role is NULL (REMM-IVDB-01482)
     UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01482', remark = 'Invalid EPE role value' WHERE role IS NULL;
     
+	# Case for role is NULL (REMM-IVDB-01487)
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01487', remark = 'Invalid EPE card value' WHERE role IS NULL;
+    
     # Update case null = 0
     UPDATE tmp_epe_detail set faulty = '0' where remark_code is null;
     UPDATE tmp_epe_detail set remark_code = '' where remark_code is null;
