@@ -49,7 +49,7 @@ BEGIN
     # remarks: we do it here because only during processing of epe is performed after upe
     SET occurrences = (SELECT COUNT(DISTINCT(epe_name)) FROM upe_main WHERE epe_name NOT IN (SELECT epe_name FROM tmp_epe_staging));
     if occurrences > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'No matching epe_name', occurrences);
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('epe_staging', 'No matching epe_name', occurrences);
     end if;
     
     # Step 4: Finalize
