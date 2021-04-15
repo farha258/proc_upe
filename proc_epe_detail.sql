@@ -176,28 +176,28 @@ BEGIN
         
 	## Step 3 - Set the faulty flag and remarks code
     # Case for unknown EPE
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01474', remark = 'Unknown EPE' WHERE epe_name NOT IN (SELECT epe_name FROM epe_main);
-    
-    # Case for unknown exchange abbreviation
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01475', remark = 'Unknown Exchange Abbreviation' WHERE zone_code IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01474', remark = 'Missing EPE/NPE information from Granite' WHERE epe_name NOT IN (SELECT epe_name FROM epe_main);
     
     # Case for epe_ip NULL (REMM-IVDB-01478)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01478', remark = 'Invalid EPE IP address' WHERE epe_ip IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01478', remark = 'IP address EPE/NPE not available from Granite' WHERE epe_ip IS NULL;
     
     # Case for epe_card IS NULL (REMM-IVDB-01479)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01479', remark = 'Invalid EPE card value' WHERE epe_card IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01479', remark = 'EPE/NPE card not available from Granite' WHERE epe_card IS NULL;
     
     # Case for epe_slot IS NULL (REMM-IVDB-01480)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01480', remark = 'Invalid EPE slot value' WHERE epe_slot IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01480', remark = 'EPE/NPE slot not available from Granite' WHERE epe_slot IS NULL;
     
     # Case for epe_port IS NULL (REMM-IVDB-01481)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01481', remark = 'Invalid EPE port value' WHERE epe_port IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01481', remark = 'EPE/NPE port not available from Granite' WHERE epe_port IS NULL;
     
     # Case for role is NULL (REMM-IVDB-01482)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01482', remark = 'Invalid EPE role value' WHERE role IS NULL;
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01482', remark = 'EPE/NPE role not available from Granite' WHERE role IS NULL;
     
-	# Case for role is NULL (REMM-IVDB-01487)
-    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01487', remark = 'Invalid EPE card value' WHERE role IS NULL;
+	# Case for epe_card > 30 (REMM-IVDB-01487)
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01487', remark = 'EPE/NPE card not available from Granite' WHERE epe_card > 30;
+    
+	# Case for epe_card is NULL (REMM-IVDB-01488)
+    UPDATE tmp_epe_detail SET faulty = '1', remark_code = 'REMM-IVDB-01488', remark = 'EPE/NPE card not available from Granite' WHERE epe_card is null;
     
     # Update case null = 0
     UPDATE tmp_epe_detail set faulty = '0' where remark_code is null;
