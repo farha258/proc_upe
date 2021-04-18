@@ -56,8 +56,37 @@ BEGIN
     INSERT INTO tmp_epe_main(customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip) SELECT customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip FROM tmp_epe_staging;
 
 	# Step 5: Now, ready to populate epe_main
-    TRUNCATE TABLE epe_main;
-    INSERT INTO epe_main SELECT * FROM tmp_epe_main;
+    INSERT INTO epe_main (
+				customer_id,
+				ptt,
+				exc,
+				epe_name,
+				status,
+				vendor,
+				model_eq,
+				serial,
+				ip) 
+      SELECT 
+				customer_id,
+				ptt,
+				exc,
+				epe_name,
+				status,
+				vendor,
+				model_eq,
+				serial,
+				ip
+      FROM tmp_epe_main AS a
+      ON DUPLICATE KEY UPDATE 
+				customer_id = a.customer_id,
+				ptt = a.ptt,
+				exc = a.exc,
+				epe_name = a.epe_name,
+				status = a.status,
+				vendor = a.vendor,
+				model_eq = a.model_eq,
+				serial = a.serial,
+				ip = a.ip;
     
     # Step 6: Archive to epe_staging_hist, and perform clean up
     INSERT INTO epe_staging_hist (customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated) SELECT customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated FROM epe_staging;
