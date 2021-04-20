@@ -81,7 +81,6 @@ BEGIN
     end if;
     
     DELETE FROM tmp_upe_staging WHERE upe_port_status NOT IN ('Activated', 'Available', 'In Service');
-    DELETE FROM tmp_upe_staging WHERE upe_vendor NOT IN ('HUAWEI', 'NOKIA');
     
     # Step 4: Populate tmp_upe_main
     INSERT INTO tmp_upe_main (
