@@ -301,5 +301,8 @@ BEGIN
 				nbgh_plus_premier,
 				updated FROM upe_staging;
     TRUNCATE TABLE upe_staging;
+    
+    # Step 7: Create function to delete data in upe_staging_hist after 7 days
+    DELETE FROM upe_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
 
 END

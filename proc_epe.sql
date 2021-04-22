@@ -90,6 +90,9 @@ BEGIN
     
     # Step 6: Archive to epe_staging_hist, and perform clean up
     INSERT INTO epe_staging_hist (customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated) SELECT customer_id,ptt,exc,epe_name,status,vendor,model_eq,serial,ip,updated FROM epe_staging;
-	  TRUNCATE TABLE epe_staging;
+	TRUNCATE TABLE epe_staging;
+    
+    # Step 7: Create function to delete data in epe_staging_hist after 7 days
+    DELETE FROM epe_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
     
 END

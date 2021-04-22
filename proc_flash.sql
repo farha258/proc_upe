@@ -125,4 +125,7 @@ BEGIN
     # Step 6: Archive the flash_staging data and clean it up
     INSERT INTO flash_staging_hist (cable_name, type, core_no, core_status, frame_name, frame_location, shelf_block, row_no, vertical, ne_id, ne_shelf, ne_slot, ne_port, frame_name2, frame_location2, shelf_block2, row_no2, vertical2, access_port, ne_id2, updated) SELECT cable_name, type, core_no, core_status, frame_name, frame_location, shelf_block, row_no, vertical, ne_id, ne_shelf, ne_slot, ne_port, frame_name2, frame_location2, shelf_block2, row_no2, vertical2, access_port, ne_id2, updated FROM flash_staging;
     TRUNCATE TABLE flash_staging;
+    
+	# Step 7: Create function to delete data in flash_staging_hist after 28 days
+    DELETE FROM flash_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 28 DAY);
 END
