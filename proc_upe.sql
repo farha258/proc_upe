@@ -140,7 +140,7 @@ BEGIN
 			control,
 			network_control,
 			nbgh_plus_premier,
-			concat_ws('',red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'_',role) as red_id FROM tmp_upe_staging group by red_id;
+			concat_ws('',red_group_id,'_',epe_name,'/',epe_card,'/',epe_slot,'/',epe_port,'/',primary_no,'_',role) as red_id FROM tmp_upe_staging group by red_id;
 
     # Step 5: Populate the upe_main
 	INSERT INTO upe_main (
@@ -303,6 +303,6 @@ BEGIN
     TRUNCATE TABLE upe_staging;
     
     # Step 7: Create function to delete data in upe_staging_hist after 7 days
-    DELETE FROM upe_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
+    DELETE FROM upe_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 60 DAY);
 
 END
