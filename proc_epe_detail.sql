@@ -102,9 +102,11 @@ BEGIN
 			epe_slot, 
 			epe_port, 
 			role, 
+            commercial_slg,
 			service_sla_slg, 
 			physical_group_slg, 
 			primary_no, 
+            customer_account,
             qos,
 			internet,
 			consumer_internet,
@@ -140,9 +142,11 @@ BEGIN
             a.epe_slot,
             a.epe_port,
             a.role,
+            e.commercial_slg,
             a.service_sla_slg,
             a.physical_group_slg,
             a.primary_no,
+            e.customer_account,
             a.qos,
 			a.internet,
 			a.consumer_internet,
@@ -170,6 +174,8 @@ BEGIN
 		LEFT JOIN (select group_concat(distinct cable_name) as cable_name, group_concat(distinct core_no) as core_no ,ne_id, ne_shelf ,ne_slot ,ne_port
 		from flash_main group by ne_id, ne_shelf ,ne_slot ,ne_port) AS d 
         ON a.epe_name = d.ne_id AND a.epe_card = d.ne_shelf AND a.epe_slot = d.ne_slot AND a.epe_port = d.ne_port
+        LEFT JOIN (select service_id, customer_account as customer_account, commercial_slg as commercial_slg from customer_profile_main group by service_id) AS e 
+        ON a.red_group_id = e.service_id        
         LEFT JOIN inv_detail AS c ON c.exc = b.exc;
         -- LEFT JOIN flash_main AS d ON a.epe_name = d.ne_id AND a.epe_card = d.ne_shelf AND a.epe_slot = d.ne_slot AND a.epe_port = d.ne_port
         -- LEFT JOIN inv_detail AS c ON c.exc = b.exc;
