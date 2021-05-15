@@ -59,13 +59,13 @@ BEGIN
 	end if;
     
 	# Error Type 3 (DELETE)
-    DELETE FROM tmp_customer_profile_daily WHERE status <> 'ACTIVE' and length(service_id) > 12;
+    DELETE FROM tmp_customer_profile_daily WHERE status <> 'ACTIVE' or length(service_id) > 12;
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty commercial_slg', affectedRow);
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'INACTIVE status and length(service_id) > 12', affectedRow);
 	end if;
     
-    # Step 4: Populate tmp_upe_main
+    # Step 4: Populate tmp_customer_profile_main
     INSERT INTO tmp_customer_profile_main (
 				service_id,
 				status,
@@ -91,7 +91,7 @@ BEGIN
 				installation_address,
 				updated FROM tmp_customer_profile_daily group by service_id;
 
-    # Step 5: Populate the upe_main
+    # Step 5: Populate the customer_profile_main
 	INSERT INTO customer_profile_main (
 				service_id,
 				status,
@@ -102,7 +102,8 @@ BEGIN
 				customer_account,
 				product,
 				commercial_slg,
-				installation_address) 
+				installation_address,
+                updated) 
       SELECT 
 				service_id,
 				status,
@@ -113,7 +114,8 @@ BEGIN
 				customer_account,
 				product,
 				commercial_slg,
-				installation_address
+				installation_address,
+                updated
       FROM tmp_customer_profile_main AS a
       ON DUPLICATE KEY UPDATE 
 		service_id = a.service_id, 
@@ -125,9 +127,10 @@ BEGIN
 		customer_account = a.customer_account,
 		product = a.product,
 		commercial_slg = a.commercial_slg,
-		installation_address = a.installation_address;
+		installation_address = a.installation_address,
+        updated = a.updated;
 
-    TRUNCATE TABLE customer_profile_daily;
+    # TRUNCATE TABLE customer_profile_daily;
     
     # Step 7: Create function to delete data in upe_staging_hist after 7 days
     DELETE FROM customer_profile_daily_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
