@@ -44,11 +44,11 @@ BEGIN
 	end if;
     
     # Error Type 3b
-    DELETE FROM tmp_upe_staging WHERE role IS NULL;
-    SET affectedRow = (SELECT ROW_COUNT());
-    if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is NULL', affectedRow);
-	end if;
+    # DELETE FROM tmp_upe_staging WHERE role IS NULL;
+    # SET affectedRow = (SELECT ROW_COUNT());
+    # if affectedRow > 0 then
+	#	INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is NULL', affectedRow);
+	# end if;
     
 	# Error Type 4
     SET occurrences = (SELECT COUNT(*) FROM tmp_upe_staging WHERE epe_card IS NULL);
@@ -300,7 +300,7 @@ BEGIN
 				network_control,
 				nbgh_plus_premier,
 				updated FROM upe_staging;
-    TRUNCATE TABLE upe_staging;
+    # TRUNCATE TABLE upe_staging;
     
     # Step 7: Create function to delete data in upe_staging_hist after 7 days
     DELETE FROM upe_staging_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 60 DAY);

@@ -48,7 +48,7 @@ BEGIN
     DELETE FROM tmp_customer_profile_daily WHERE service_id = '' or service_id is null;
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
-		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty customer_account', affectedRow);
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty service_id', affectedRow);
 	end if;
     
 	# Error Type 2 (NOT DELETE)
@@ -59,7 +59,7 @@ BEGIN
 	end if;
     
 	# Error Type 3 (DELETE)
-    DELETE FROM tmp_customer_profile_daily WHERE status <> 'ACTIVE';
+    DELETE FROM tmp_customer_profile_daily WHERE status <> 'ACTIVE' and length(service_id) > 12;
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty commercial_slg', affectedRow);
@@ -127,7 +127,7 @@ BEGIN
 		commercial_slg = a.commercial_slg,
 		installation_address = a.installation_address;
 
-    # TRUNCATE TABLE customer_profile_daily;
+    TRUNCATE TABLE customer_profile_daily;
     
     # Step 7: Create function to delete data in upe_staging_hist after 7 days
     DELETE FROM customer_profile_daily_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
