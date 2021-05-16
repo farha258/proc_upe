@@ -77,7 +77,8 @@ BEGIN
 				product,
 				commercial_slg,
 				installation_address,
-				updated) 
+				updated,
+                customer_ref_id) 
     SELECT 
 				service_id,
 				status,
@@ -89,7 +90,8 @@ BEGIN
 				product,
 				commercial_slg,
 				installation_address,
-				updated FROM tmp_customer_profile_daily group by service_id;
+				updated,
+                concat_ws('',service_id,'_',billing_account_no) as customer_ref_id FROM tmp_customer_profile_daily group by customer_ref_id;
 
     # Step 5: Populate the customer_profile_main
 	INSERT INTO customer_profile_main (
@@ -103,7 +105,8 @@ BEGIN
 				product,
 				commercial_slg,
 				installation_address,
-                updated) 
+                updated,
+                customer_ref_id) 
       SELECT 
 				service_id,
 				status,
@@ -115,7 +118,8 @@ BEGIN
 				product,
 				commercial_slg,
 				installation_address,
-                updated
+                updated,
+                customer_ref_id
       FROM tmp_customer_profile_main AS a
       ON DUPLICATE KEY UPDATE 
 		service_id = a.service_id, 
@@ -128,7 +132,8 @@ BEGIN
 		product = a.product,
 		commercial_slg = a.commercial_slg,
 		installation_address = a.installation_address,
-        updated = a.updated;
+        updated = a.updated,
+        customer_ref_id =a.customer_ref_id;
 
     # TRUNCATE TABLE customer_profile_daily;
     
