@@ -43,6 +43,13 @@ BEGIN
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Role is not in format PRIMARY/SECONDARY/ACTIVE/PASSIVE', affectedRow);
 	end if;
     
+	# Error Type 3c
+    SET occurrences = (SELECT COUNT(*) FROM tmp_upe_staging WHERE role IS NULL and upe_name not regexp '^[NE]');
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+	INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('upe_staging', 'Need to be updated for role', affectedRow);
+	end if;
+    
     # Error Type 3b
     # DELETE FROM tmp_upe_staging WHERE role IS NULL;
     # SET affectedRow = (SELECT ROW_COUNT());
