@@ -1,7 +1,9 @@
 CREATE DEFINER=`admin_user`@`%` PROCEDURE `proc_epe_detail`()
 BEGIN
 	## Step 0 - Insert into epe_detail_hist 
-    INSERT INTO epe_detail_hist (red_group_id,
+    INSERT INTO epe_detail_hist (
+								bandwidth,
+								red_group_id,
 								upe_name,
 								upe_vendor,
 								upe_model,
@@ -43,7 +45,9 @@ BEGIN
 								faulty,
 								remark_code,
                                 remark,
-								updated) SELECT red_group_id,
+								updated) SELECT 
+                                bandwidth,
+                                red_group_id,
 								upe_name,
 								upe_vendor,
 								upe_model,
@@ -94,6 +98,7 @@ BEGIN
     
     ## Step 2 - Populate the raw epe_detail
     INSERT INTO tmp_epe_detail(
+			bandwidth,
 			red_group_id, 	
 			upe_name, 
 			upe_vendor, 
@@ -134,6 +139,7 @@ BEGIN
 			wilayah_code, 
 			region_code)
 	SELECT 
+			a.bandwidth,
 			a.red_group_id, 
             a.upe_name, 
             a.upe_vendor, 
