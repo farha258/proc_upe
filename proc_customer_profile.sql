@@ -65,6 +65,27 @@ BEGIN
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'INACTIVE status and length(service_id) > 12', affectedRow);
 	end if;
     
+	# Error Type 4 (NOT DELETE)
+    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where billing_account_no is null or billing_account_no='' or billing_account_no=0);
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty billing_account_no', affectedRow);
+	end if;
+    
+	# Error Type 5 (NOT DELETE)
+    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where customer_account is null or customer_account='');
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty customer_account', affectedRow);
+	end if;
+    
+	# Error Type 6 (DELETE)
+    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where status not in ('Inactive','Active'));
+    SET affectedRow = (SELECT ROW_COUNT());
+    if affectedRow > 0 then
+		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Status is not Active or Inactive', affectedRow);
+	end if;
+    
     # Step 4: Populate tmp_customer_profile_main
     INSERT INTO tmp_customer_profile_main (
 				service_id,
