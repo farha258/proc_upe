@@ -112,7 +112,7 @@ BEGIN
 				commercial_slg,
 				installation_address,
 				updated,
-                concat_ws('',service_id,'_',billing_account_no) as customer_ref_id FROM tmp_customer_profile_daily group by customer_ref_id;
+                concat_ws('',service_id,'_',billing_account_no,'_', installation_date) as customer_ref_id FROM tmp_customer_profile_daily group by customer_ref_id;
 
     # Step 5: Populate the customer_profile_main
 	INSERT INTO customer_profile_main (
@@ -156,7 +156,7 @@ BEGIN
         updated = a.updated,
         customer_ref_id =a.customer_ref_id;
 
-    # TRUNCATE TABLE customer_profile_daily;
+    TRUNCATE TABLE customer_profile_daily;
     
     # Step 7: Create function to delete data in upe_staging_hist after 7 days
     DELETE FROM customer_profile_daily_hist WHERE updated < DATE_SUB(CURDATE(), INTERVAL 7 DAY);
