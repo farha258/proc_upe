@@ -44,15 +44,22 @@ BEGIN
     
     # Step 2: Clean up
     
+	# Step 2: Fix values
+    UPDATE tmp_customer_profile_daily SET service_id = NULL WHERE service_id = '';
+    UPDATE tmp_customer_profile_daily SET commercial_slg = NULL WHERE commercial_slg = '';
+    UPDATE tmp_customer_profile_daily SET customer_account = NULL WHERE customer_account = '';
+    UPDATE tmp_customer_profile_daily SET billing_account_no = NULL WHERE billing_account_no = '';
+    UPDATE tmp_customer_profile_daily SET billing_account_no = NULL WHERE billing_account_no = '0';
+        
     # Error Type 1 (DELETE)
-    DELETE FROM tmp_customer_profile_daily WHERE service_id = '' or service_id is null;
+    DELETE FROM tmp_customer_profile_daily WHERE service_id is null;
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty service_id', affectedRow);
 	end if;
     
 	# Error Type 2 (NOT DELETE)
-    SET occurrences = (SELECT count(*) FROM tmp_customer_profile_daily WHERE commercial_slg = '' or commercial_slg is null);
+    SET occurrences = (SELECT count(*) FROM tmp_customer_profile_daily WHERE commercial_slg is null);
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty commercial_slg', affectedRow);
@@ -66,14 +73,14 @@ BEGIN
 	end if;
     
 	# Error Type 4 (NOT DELETE)
-    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where billing_account_no is null or billing_account_no='' or billing_account_no=0);
+    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where billing_account_no is null);
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty billing_account_no', affectedRow);
 	end if;
     
 	# Error Type 5 (NOT DELETE)
-    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where customer_account is null or customer_account='');
+    SET occurrences = (SELECT count(*) FROM metroe.customer_profile_daily where customer_account is null);
     SET affectedRow = (SELECT ROW_COUNT());
     if affectedRow > 0 then
 		INSERT INTO metroe_error(table_name, remarks, occurrences) VALUE('customer_profile_daily', 'Empty customer_account', affectedRow);
